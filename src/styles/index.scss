@@ -1,0 +1,32 @@
+@import 'normalize';
+@import 'variables';
+
+body, html {
+  height: 100%;
+  color: $yellow;
+  font-size: 16px;
+  -webkit-font-smoothing: subpixel-antialiased;
+  font-family: 'Quantico', Helvetica, Arial, sans-serif;
+  background-image: linear-gradient(to top, #4f157f, #64189a, #7b19b5, #9418d0, #ae12ec);
+}
+
+h1, h2, h3 {
+  font-family: 'Quantico', Helvetica, Arial, sans-serif;
+}
+
+h3 {
+  font-size: 1.2rem;
+  line-height: 1.333em;
+  font-weight: 500;
+}
+
+#root {
+  height: 100%;
+}
+
+canvas {
+  height: 100%;
+  width: 100%;
+  position: absolute;
+  top: 0;
+}
