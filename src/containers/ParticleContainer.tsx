@@ -1,83 +1,44 @@
 import * as React from 'react';
-import Particle from './Particle';
-import MicroParticle from './MicroParticle';
+import Particle from '../utils/Particle';
+import MicroParticle from '../utils/MicroParticle';
+import { clearCanvas, CanvasProps } from '../utils/canvasUtils';
 
-class ParticleContainer extends React.Component {
-  canvas: HTMLCanvasElement;
-  context: CanvasRenderingContext2D;
-  particles: Particle[] = [];
-  microparticles: MicroParticle[] = [];
-  intervalDuration: number = 1000;
+let intervalDuration: number = 1000;
+const randomIntervalDuration: number = 2000 * Math.random();
 
-  componentWillMount() {
-    const { canvas, context } = this.createCanvas();
+let particles: Particle[] = [];
+let microparticles: MicroParticle[] = [];
 
-    this.canvas = canvas;
-    this.context = context;
+function ParticleContainer(): React.ReactElement {
+  const ref = React.useRef(null);
 
-    document.body.appendChild(this.canvas);
+  React.useEffect(() => {
+    const canvas = ref.current;
+    const context = ref.current.getContext('2d');
 
-    this.update();
+    update({ canvas, context });
 
     setInterval(() => {
       if (document.hidden) return;
-      this.particles.push(new Particle({
-        canvas: this.canvas,
-        context: this.context,
-        addMicroParticle: this.addMicroParticle.bind(this)
+      particles.push(new Particle({
+        canvas,
+        context,
+        addMicroParticle: (microparticle: MicroParticle) => {
+          microparticles.push(microparticle);
+        }
       }));
-      this.intervalDuration = 2000 * Math.random();
-    }, this.intervalDuration);
-  }
+      intervalDuration = randomIntervalDuration;
+    }, intervalDuration);
+  }, []);
 
-  createCanvas() {
-    const canvas = document.createElement('canvas');
-    const context = canvas.getContext('2d');
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-    return {
-      canvas,
-      context
-    }
-  }
+  return <canvas ref={ref} width={window.innerWidth} height={window.innerHeight} />;
+}
 
-  clear() {
-    const alpha = 0.16;
-    const gradient = this.context.createRadialGradient(
-      this.canvas.width / 2,
-      this.canvas.height / 2,
-      0,
-      this.canvas.width / 2,
-      this.canvas.height / 2,
-      this.canvas.width * 2
-    );
-
-    gradient.addColorStop(0, 'rgba(79,21,127,1)');
-    gradient.addColorStop(1, 'rgba(26,14,4,0)');
-
-    this.context.globalAlpha = alpha;
-    this.context.fillStyle = gradient;
-    this.context.fillRect(0, 0, this.canvas.width, this.canvas.height);
-  }
-
-  update() {
-    this.clear();
-    this.particles = this.particles.filter(p => p.move());
-    this.microparticles = this.microparticles.filter(mp => mp.move());
-    requestAnimationFrame(this.update.bind(this));
-  }
-
-  addMicroParticle(microparticle: MicroParticle) {
-    this.microparticles.push(microparticle);
-  }
-
-  componentWillUnmount() {
-    document.body.removeChild(this.canvas);
-  }
-
-  render(): null {
-    return null
-  }
+function update({ canvas, context }: CanvasProps): void {
+  clearCanvas(canvas, context);
+  particles = particles.filter((p: Particle) => p.move());
+  microparticles = microparticles.filter((mp: MicroParticle) => mp.move());
+  requestAnimationFrame(update.bind(this, { canvas, context }));
 }
 
 export default ParticleContainer;
